@@ -11,7 +11,7 @@
 
 2. **Set Up Environment Variables**  
    - Create a `.env.local` file in the root folder.  
-   - Add the `NEWS_API_KEY` to the file. You can obtain the key by signing up at [NewsAPI](https://newsapi.org/).
+   - Add the `NEXT_PUBLIC_NEWS_API_KEY` to the file. You can obtain the key by signing up at [NewsAPI](https://newsapi.org/).
 
 3. **Install Dependencies**  
    - Install the required dependencies by running:  
