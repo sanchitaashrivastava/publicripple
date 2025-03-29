@@ -1,9 +1,30 @@
 # publicripple
 
-Steps to run this:
-1. Go to your branch in the publicripple repo. Make sure it is up to date with the main branch.
-2. Make sure you have the latest version of the `publicripple` repo. You can do this by running `git pull origin main` in your terminal.
-3. Add a .env.local file in your root folder and put the NEWS_API_KEY in it. You can get the key by signing up at [NewsAPI](https://newsapi.org/).
-4. Make sure you have the required dependencies installed. You can do this by running `npm install` in your terminal.
-5. Run the app by executing `npm run dev` in your terminal. This will start the development server and open the app in your default web browser.
-6. Make sure you are not on the main branch if you are making any changes.
+## Steps to Run the Project
+
+1. **Update Your Branch**  
+   - Navigate to your branch in the `publicripple` repository.  
+   - Ensure it is up to date with the `main` branch by running:  
+     ```bash
+     git pull origin main
+     ```
+
+2. **Set Up Environment Variables**  
+   - Create a `.env.local` file in the root folder.  
+   - Add the `NEWS_API_KEY` to the file. You can obtain the key by signing up at [NewsAPI](https://newsapi.org/).
+
+3. **Install Dependencies**  
+   - Install the required dependencies by running:  
+     ```bash
+     npm install
+     ```
+
+4. **Run the Development Server**  
+   - Start the app by executing:  
+     ```bash
+     npm run dev
+     ```  
+   - This will launch the development server and open the app in your default web browser.
+
+5. **Branch Management**  
+   - Ensure you are not on the `main` branch if you are making any changes.
