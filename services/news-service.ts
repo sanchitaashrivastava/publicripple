@@ -1,59 +1,35 @@
 export interface NewsArticle {
-  uuid: string
   title: string
   description: string
-  snippet: string
   url: string
-  image_url: string | null
-  published_at: string
-  source: string
-  categories: string[]
-  relevance_score: number | null
-  locale: string
-}
-
-export interface NewsResponse {
-  meta: {
-    found: number
-    returned: number
-    limit: number
-    page: number
+  urlToImage: string | null
+  publishedAt: string
+  source: {
+    name: string
   }
-  data: NewsArticle[]
+  content: string
 }
 
-export async function fetchNews(category = ""): Promise<NewsArticle[]> {
+export async function fetchNews(category = "general"): Promise<NewsArticle[]> {
   try {
-    const apiKey = process.env.NEWS_API_KEY
-    let url = `https://api.thenewsapi.com/v1/news/top?api_token=${apiKey}&locale=us&limit=10`
-
-    // Add category if provided
-    if (category) {
-      url += `&categories=${category}`
-    }
-
-    const response = await fetch(url)
-
+    const response = await fetch(`/api/news?category=${category}`)
+    
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`)
     }
 
-    const data: NewsResponse = await response.json()
-    return data.data
+    return await response.json()
   } catch (error) {
     console.error("Error fetching news:", error)
     return []
   }
 }
 
-// Map user preference categories to API categories
 export function mapUserCategoryToApiCategory(userCategory: string): string {
   const categoryMap: Record<string, string> = {
-    comfort: "politics",
+    comfort: "entertainment",
     balanced: "general",
-    challenge: "opinion",
-  }
-
-  return categoryMap[userCategory] || "general"
+    challenge: "technology"
+  };
+  return categoryMap[userCategory] || "general";
 }
-

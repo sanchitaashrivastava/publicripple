@@ -30,72 +30,42 @@ export default function FeedPage() {
       const categories = ["comfort", "balanced", "challenge"]
 
       for (const category of categories) {
-        setLoading((prev) => ({ ...prev, [category]: true }))
+        setLoading(prev => ({ ...prev, [category]: true }))
         const apiCategory = mapUserCategoryToApiCategory(category)
         const newsArticles = await fetchNews(apiCategory)
-
-        setArticles((prev) => ({
+        
+        setArticles(prev => ({
           ...prev,
           [category]: newsArticles,
         }))
-        setLoading((prev) => ({ ...prev, [category]: false }))
+        setLoading(prev => ({ ...prev, [category]: false }))
       }
     }
 
     loadArticles()
   }, [])
 
-  const handleLike = async (articleId: string) => {
-    // Remove from disliked if it's there
-    if (dislikedArticles.has(articleId)) {
-      setDislikedArticles((prev) => {
-        const newDisliked = new Set(prev)
-        newDisliked.delete(articleId)
-        return newDisliked
-      })
-    }
-
-    // Toggle liked status
-    setLikedArticles((prev) => {
+  const handleLike = async (articleUrl: string) => {
+    setDislikedArticles(prev => new Set([...prev].filter(url => url !== articleUrl)))
+    setLikedArticles(prev => {
       const newLiked = new Set(prev)
-      if (newLiked.has(articleId)) {
-        newLiked.delete(articleId)
-      } else {
-        newLiked.add(articleId)
-      }
+      newLiked.has(articleUrl) ? newLiked.delete(articleUrl) : newLiked.add(articleUrl)
       return newLiked
     })
-
-    // Record feedback to backend
-    if (!likedArticles.has(articleId)) {
-      await recordUserFeedback(articleId, "like")
+    if (!likedArticles.has(articleUrl)) {
+      await recordUserFeedback(articleUrl, "like")
     }
   }
 
-  const handleDislike = async (articleId: string) => {
-    // Remove from liked if it's there
-    if (likedArticles.has(articleId)) {
-      setLikedArticles((prev) => {
-        const newLiked = new Set(prev)
-        newLiked.delete(articleId)
-        return newLiked
-      })
-    }
-
-    // Toggle disliked status
-    setDislikedArticles((prev) => {
+  const handleDislike = async (articleUrl: string) => {
+    setLikedArticles(prev => new Set([...prev].filter(url => url !== articleUrl)))
+    setDislikedArticles(prev => {
       const newDisliked = new Set(prev)
-      if (newDisliked.has(articleId)) {
-        newDisliked.delete(articleId)
-      } else {
-        newDisliked.add(articleId)
-      }
+      newDisliked.has(articleUrl) ? newDisliked.delete(articleUrl) : newDisliked.add(articleUrl)
       return newDisliked
     })
-
-    // Record feedback to backend
-    if (!dislikedArticles.has(articleId)) {
-      await recordUserFeedback(articleId, "dislike")
+    if (!dislikedArticles.has(articleUrl)) {
+      await recordUserFeedback(articleUrl, "dislike")
     }
   }
 
@@ -123,29 +93,32 @@ export default function FeedPage() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {articles[activeTab].map((article) => (
-                <Card key={article.uuid} className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
+              {articles[activeTab].map(article => (
+                <Card key={article.url} className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
                   <div onClick={() => openArticle(article.url)}>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-xl">{article.title}</CardTitle>
                       <CardDescription className="text-sm">
-                        {article.source} • {new Date(article.published_at).toLocaleDateString()}
+                        {article.source.name} • {new Date(article.publishedAt).toLocaleDateString()}
                       </CardDescription>
                     </CardHeader>
-                    {article.image_url && (
+                    {article.urlToImage && (
                       <div className="px-6 pb-2">
                         <div className="relative h-48 w-full overflow-hidden rounded-md">
                           <Image
-                            src={article.image_url || "/placeholder.svg"}
+                            src={article.urlToImage}
                             alt={article.title}
                             fill
                             style={{ objectFit: "cover" }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg"
+                            }}
                           />
                         </div>
                       </div>
                     )}
                     <CardContent>
-                      <p>{article.description || article.snippet}</p>
+                      <p>{article.description || article.content?.substring(0, 100)}</p>
                     </CardContent>
                   </div>
                   <CardFooter className="flex justify-between pt-2 border-t">
@@ -155,30 +128,30 @@ export default function FeedPage() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleLike(article.uuid)
+                          handleLike(article.url)
                         }}
-                        className={`flex items-center gap-1 ${likedArticles.has(article.uuid) ? "text-green-600" : ""}`}
+                        className={`flex items-center gap-1 ${likedArticles.has(article.url) ? "text-green-600" : ""}`}
                       >
                         <Heart
-                          className={likedArticles.has(article.uuid) ? "fill-green-500 text-green-500" : ""}
+                          className={likedArticles.has(article.url) ? "fill-green-500 text-green-500" : ""}
                           size={18}
                         />
-                        {likedArticles.has(article.uuid) ? "Liked" : "Like"}
+                        {likedArticles.has(article.url) ? "Liked" : "Like"}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleDislike(article.uuid)
+                          handleDislike(article.url)
                         }}
-                        className={`flex items-center gap-1 ${dislikedArticles.has(article.uuid) ? "text-red-600" : ""}`}
+                        className={`flex items-center gap-1 ${dislikedArticles.has(article.url) ? "text-red-600" : ""}`}
                       >
                         <ThumbsDown
-                          className={dislikedArticles.has(article.uuid) ? "fill-red-500 text-red-500" : ""}
+                          className={dislikedArticles.has(article.url) ? "fill-red-500 text-red-500" : ""}
                           size={18}
                         />
-                        {dislikedArticles.has(article.uuid) ? "Disliked" : "Dislike"}
+                        {dislikedArticles.has(article.url) ? "Disliked" : "Dislike"}
                       </Button>
                     </div>
                     <Button
