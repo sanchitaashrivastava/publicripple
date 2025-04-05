@@ -56,7 +56,7 @@ export function mapUserCategoryToApiCategory(userCategory: string): string {
   const categoryMap: Record<string, string> = {
     comfort: "politics",
     balanced: "general",
-    challenge: "opinion",
+    challenge: "tech",
   }
 
   return categoryMap[userCategory] || "general"
