@@ -32,23 +32,29 @@ export default function FeedPage() {
       // Define our three content categories
       const categories = ["comfort", "balanced", "challenge"]
 
-      // Load articles for each category
+      // Inside the useEffect hook within the loadArticles function:
       for (const category of categories) {
-        setLoading(prev => ({ ...prev, [category]: true })) // Show loading spinner
-        
-        // Convert our category name to API category
-        const apiCategory = mapUserCategoryToApiCategory(category)
-        
-        // Fetch news articles from The News API
-        const newsArticles = await fetchNews(apiCategory)
-        
-        // Update articles state with new data
+        setLoading(prev => ({ ...prev, [category]: true }))
+
+        const apiCategory = mapUserCategoryToApiCategory(category);
+        // --- Add Logging Here ---
+        if (category === 'challenge') {
+          console.log(`[Feed Debug] Mapped API category/params for 'challenge':`, apiCategory);
+        }
+        // -----------------------
+
+        const newsArticles = await fetchNews(apiCategory);
+        // --- Add Logging Here ---
+        if (category === 'challenge') {
+          console.log(`[Feed Debug] Fetched articles for 'challenge' (${JSON.stringify(apiCategory)}):`, newsArticles);
+        }
+        // -----------------------
+
         setArticles(prev => ({
           ...prev,
           [category]: newsArticles,
         }))
-        
-        // Hide loading spinner
+
         setLoading(prev => ({ ...prev, [category]: false }))
       }
     }
