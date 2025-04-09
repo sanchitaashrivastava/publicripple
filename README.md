@@ -1,6 +1,27 @@
 # publicripple
 
-## Steps to Run the Project
+## Steps to Run the Backend
+
+1. Use a .env in server that has:
+- DB_HOST
+- DB_NAME
+- DB_USER
+- DB_PASSWORD
+- DB_PORT
+- PUBLIC_NEWS_API_KEY
+2. Create a python virtual environment  
+`For Windows
+python -m venv venv
+venv\Scripts\activate`  
+
+`For macOS/Linux
+python3 -m venv venv
+source venv/bin/activate`
+3. Run pip install -r server/requirements.txt to install dependencies
+4. Start project by running python server/app.py
+
+
+## Steps to Run the Front End
 
 1. **Update Your Branch**  
    - Navigate to your branch in the `publicripple` repository.  
