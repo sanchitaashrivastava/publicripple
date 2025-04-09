@@ -71,8 +71,8 @@ class DatabaseHandler:
         for article in articles:
             cursor.execute(
                 """
-                INSERT INTO articles (id, headline, url, source, abstract, article_date, date_added)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO articles (id, headline, url, source, abstract, article_date, date_added, image_url)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     headline = EXCLUDED.headline,
                     url = EXCLUDED.url,
@@ -87,7 +87,8 @@ class DatabaseHandler:
                     article['source'],
                     article['abstract'],
                     article['article_date'],
-                    datetime.now()
+                    datetime.now(),
+                    article['image_url']
                 )
             )
         
@@ -115,7 +116,7 @@ class DatabaseHandler:
         
         cursor.execute(
             """
-            INSERT INTO feed (email, flag, article_id, access_date, likes)
+            INSERT INTO feed (email, article_id, flag, access_date, likes)
             VALUES (%s, %s, %s, %s, 0)
             """,
             (email, flag, article_id, datetime.now())
@@ -128,13 +129,15 @@ class DatabaseHandler:
         return True
     
     @staticmethod
-    def update_likes(feed_id, likes):
+    def update_likes(email, article_id, flag, value):
         """
         Update the likes count for a feed item
         
         Args:
-            feed_id (int): Feed item ID
-            likes (int): New likes count
+            email (str): User's Email
+            article_id (str): Article ID
+            flag (str): Feed type
+            value (str): New likes value
             
         Returns:
             bool: True if update was successful
@@ -146,9 +149,11 @@ class DatabaseHandler:
             """
             UPDATE feed
             SET likes = %s
-            WHERE id = %s
+            WHERE email = %s
+            AND flag = %s
+            AND article_id = %s
             """,
-            (likes, feed_id)
+            (value, email, flag, article_id)
         )
         
         conn.commit()
@@ -297,3 +302,116 @@ class DatabaseHandler:
         conn.close()
         
         return result
+# Add these new functions to the DatabaseHandler class
+
+    @staticmethod
+    def get_liked_sources_by_email(email):
+        """
+        Get sources liked by a user
+        
+        Args:
+            email (str): User email
+            
+        Returns:
+            dict: Source name -> count of likes
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get sources from articles liked by the user
+        cursor.execute("""
+            SELECT a.source, COUNT(*) as like_count
+            FROM feed f
+            JOIN articles a ON f.article_id = a.id
+            WHERE f.email = %s AND f.likes > 0
+            GROUP BY a.source
+            ORDER BY like_count DESC
+        """, (email,))
+        
+        sources = {row[0]: row[1] for row in cursor.fetchall()}
+        
+        cursor.close()
+        conn.close()
+        
+        return sources
+    @staticmethod
+    def get_disliked_sources_by_email(email):
+        """
+        Get sources liked by a user
+        
+        Args:
+            email (str): User email
+            
+        Returns:
+            dict: Source name -> count of likes
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get sources from articles liked by the user
+        cursor.execute("""
+            SELECT a.source, COUNT(*) as like_count
+            FROM feed f
+            JOIN articles a ON f.article_id = a.id
+            WHERE f.email = %s AND f.likes < 0
+            GROUP BY a.source
+            ORDER BY like_count DESC
+        """, (email,))
+        
+        sources = {row[0]: row[1] for row in cursor.fetchall()}
+        
+        cursor.close()
+        conn.close()
+        
+        return sources
+        
+    @staticmethod
+    def insert_feed_without_duplicate(email, flag, article_id):
+        """
+        Insert article to feed table, avoiding duplicates
+        
+        Args:
+            email (str): User email
+            flag (str): Feed flag
+            article_id (str): Article ID
+            
+        Returns:
+            bool: Success status
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Check if this email-article_id combination already exists
+            cursor.execute(
+                "SELECT 1 FROM feed WHERE email = %s AND article_id = %s AND flag = %s",
+                (email, article_id, flag)
+            )
+            
+            if cursor.fetchone():
+                # Already exists, skip insertion
+                cursor.close()
+                conn.close()
+                return True
+            
+            # print(email, article_id, flag)
+            # Insert new record
+            cursor.execute(
+                """
+                INSERT INTO feed (email, article_id, flag, access_date, likes)
+                VALUES (%s, %s, %s, %s, 0)
+                """,
+                (email, article_id, flag, datetime.now(),)
+            )
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+            
+        except Exception as e:
+            # Log the error
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return False

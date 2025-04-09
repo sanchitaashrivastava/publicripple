@@ -6,7 +6,7 @@ def get_db_connection():
     """
     Create and return a connection to the PostgreSQL database
     """
-    print(PUBLIC_NEWS_API_KEY)
+    # print(PUBLIC_NEWS_API_KEY)
     conn = psycopg2.connect(
         host=DB_HOST,
         port=DB_PORT,

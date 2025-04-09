@@ -35,6 +35,7 @@ def fetch_and_store_top_articles(category=None):
             'source': article['source'],
             'abstract': article['description'] or article['snippet'],
             'article_date': article['published_at'],
+            'image_url': article['image_url']
             # date_added will be automatically set in the insert function
         }
         articles_for_db.append(transformed_article)
