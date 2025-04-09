@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 export interface NewsArticle {
   uuid: string
   title: string
@@ -27,9 +24,7 @@ export interface NewsResponse {
 
 export async function fetchNews(category = ""): Promise<NewsArticle[]> {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
-    console.log("Environment Variables:", process.env);
-    console.log("API Key:", apiKey) // Log the API key for debugging purposes
+    const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY
     let url = `https://api.thenewsapi.com/v1/news/top?api_token=${apiKey}&locale=us&limit=10`
 
     // Add category if provided
@@ -56,9 +51,8 @@ export function mapUserCategoryToApiCategory(userCategory: string): string {
   const categoryMap: Record<string, string> = {
     comfort: "politics",
     balanced: "general",
-    challenge: "tech",
+    challenge: "opinion",
   }
 
   return categoryMap[userCategory] || "general"
 }
-

@@ -9,7 +9,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Public Ripple",
   description: "Customize your news feed based on your preferences",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -28,7 +27,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

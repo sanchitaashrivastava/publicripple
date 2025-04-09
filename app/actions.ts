@@ -1,16 +1,33 @@
 "use server"
 
-export async function recordUserFeedback(articleId: string, feedback: "like" | "dislike") {
-  try {
-    // In a real application, you would store this in a database
-    // For now, we'll just log it to the console
-    console.log(`User feedback recorded: ${feedback} for article ${articleId}`)
+import type { NewsArticle } from "@/services/news-service"
+import { recordArticleFeedback } from "@/services/db-service"
 
-    // Simulate a successful API call
-    return { success: true }
+export async function recordUserFeedback(
+  article: NewsArticle,
+  feedback: "like" | "dislike",
+  category: string,
+  email: string,
+) {
+  try {
+    // Store feedback in database
+    const success = await recordArticleFeedback(email, article.uuid, feedback, category)
+
+    if (!success) {
+      throw new Error("Failed to record feedback")
+    }
+
+    return {
+      success: true,
+      article,
+      feedback,
+      category,
+    }
   } catch (error) {
     console.error("Error recording user feedback:", error)
-    return { success: false, error: "Failed to record feedback" }
+    return {
+      success: false,
+      error: "Failed to record feedback",
+    }
   }
 }
-
