@@ -1,231 +1,111 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useUser } from "@/contexts/user-context"
-import Image from "next/image"
-import { getUserByEmail, createUser, loginUser, hasCompletedSurvey } from "@/services/db-service"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import { isSupabaseConfigured } from "@/lib/supabase"
+import { motion } from "framer-motion"
+import { ArrowRight, BarChart3, Newspaper, Sparkles } from "lucide-react"
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+export default function HomePage() {
   const router = useRouter()
-  const { user, login } = useUser()
 
-  // Check if user is already logged in
-  useEffect(() => {
-    if (user) {
-      router.push("/feed")
-    }
-  }, [user, router])
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      // Attempt to login
-      const user = await loginUser(email, password)
-
-      if (!user) {
-        setError("Invalid email or password")
-        setIsLoading(false)
-        return
-      }
-
-      // Login successful - update user context
-      login(email)
-
-      // Check if user has completed survey
-      const hasSurvey = await hasCompletedSurvey(email)
-
-      // Add a small delay to ensure context is updated before navigation
-      setTimeout(() => {
-        if (hasSurvey) {
-          // Redirect returning users directly to feed
-          router.push("/feed")
-        } else {
-          // Redirect new users to survey
-          router.push("/survey")
-        }
-        setIsLoading(false)
-      }, 100)
-    } catch (error) {
-      console.error("Login error:", error)
-      setError("An error occurred during login")
-      setIsLoading(false)
-    }
-  }
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      // Check if user already exists
-      const existingUser = await getUserByEmail(email)
-
-      if (existingUser) {
-        setError("User already exists. Please login instead.")
-        setIsLoading(false)
-        return
-      }
-
-      // Create new user
-      const newUser = await createUser(email, password)
-
-      if (!newUser) {
-        throw new Error("Failed to create user")
-      }
-
-      // Login the new user
-      login(email)
-
-      // Show toast notification
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully! Please complete the survey to personalize your feed.",
-      })
-
-      // Add a small delay to ensure context is updated before navigation
-      setTimeout(() => {
-        // Redirect new users to survey
-        router.push("/survey")
-        setIsLoading(false)
-      }, 100)
-    } catch (error) {
-      console.error("Signup error:", error)
-      setError("An error occurred during signup")
-      setIsLoading(false)
-    }
+  const handleGetStarted = () => {
+    router.push("/login")
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-purple-50">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-md">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <Image src="/logo.png" alt="Public Ripple Logo" width={100} height={100} className="h-24 w-auto" />
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <header className="bg-purple-900 py-4 px-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+              <Newspaper className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white">Public Ripple</span>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome to Public Ripple</h2>
-          <p className="mt-2 text-sm text-gray-600">Customize your news experience</p>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/login")}
+            className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+          >
+            Sign In
+          </Button>
         </div>
+      </header>
 
-        {!isSupabaseConfigured() && (
-          <div className="bg-yellow-50 text-yellow-800 p-3 rounded-md text-sm mb-4">
-            Database connection not configured. Using local storage for demo purposes.
-          </div>
-        )}
+      {/* Main Content */}
+      <main className="flex-1 container mx-auto px-4 py-16 flex flex-col items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center max-w-3xl mb-12"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            News that matches <span className="text-purple-700">your perspective</span>
+          </h1>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+          <p className="text-lg text-gray-600 mb-8">
+            Public Ripple helps you discover news content that either aligns with your views or thoughtfully challenges
+            them—you decide how far to step outside your comfort zone.
+          </p>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+          <Button
+            onClick={handleGetStarted}
+            size="lg"
+            className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 px-8"
+          >
+            Get Started
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
 
-          <TabsContent value="login">
-            <form onSubmit={handleLogin} className="mt-4 space-y-6">
-              <div className="space-y-4 rounded-md shadow-sm">
-                <div>
-                  <Label htmlFor="login-email">Email address</Label>
-                  <Input
-                    id="login-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="mt-1"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="login-password">Password</Label>
-                  <Input
-                    id="login-password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="mt-1"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+          <FeatureCard
+            icon={<BarChart3 className="h-6 w-6 text-purple-600" />}
+            title="Personalized Feed"
+            description="News tailored to your political preferences and comfort level"
+          />
+          <FeatureCard
+            icon={<Sparkles className="h-6 w-6 text-purple-600" />}
+            title="Preference Survey"
+            description="Simple interactive survey to understand your viewpoints"
+          />
+          <FeatureCard
+            icon={<ArrowRight className="h-6 w-6 text-purple-600" />}
+            title="Expand Horizons"
+            description="Gradually explore different perspectives at your own pace"
+          />
+        </div>
+      </main>
 
-              <div>
-                <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
-                </Button>
-              </div>
-            </form>
-          </TabsContent>
+      {/* Footer */}
+      <footer className="bg-gray-50 py-4 px-6 border-t">
+        <div className="container mx-auto text-center text-sm text-gray-500">
+          <p>© 2025 Public Ripple. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
 
-          <TabsContent value="signup">
-            <form onSubmit={handleSignup} className="mt-4 space-y-6">
-              <div className="space-y-4 rounded-md shadow-sm">
-                <div>
-                  <Label htmlFor="signup-email">Email address</Label>
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="mt-1"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    className="mt-1"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    minLength={6}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800" disabled={isLoading}>
-                  {isLoading ? "Signing up..." : "Sign Up"}
-                </Button>
-              </div>
-
-              <p className="text-xs text-center text-gray-500 mt-4">
-                By signing up, you'll be asked to complete a short survey to personalize your news feed.
-              </p>
-            </form>
-          </TabsContent>
-        </Tabs>
-        <Toaster />
-      </div>
+// Feature card component
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+      <div className="mb-4 bg-purple-50 w-12 h-12 rounded-full flex items-center justify-center">{icon}</div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-gray-600">{description}</p>
     </div>
   )
 }
