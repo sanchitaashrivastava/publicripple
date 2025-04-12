@@ -6,11 +6,19 @@ import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/contexts/user-context"
 import { logoutUser } from "@/services/db-service"
+import { useEffect, useState } from "react"
 
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useUser()
+  const [mounted, setMounted] = useState(false)
+
+  // This ensures we only render the full navbar after the component has mounted
+  // to prevent hydration mismatch between server and client
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogout = async () => {
     // Sign out from Supabase
@@ -31,11 +39,16 @@ export function Navbar() {
           <span className="text-xl font-bold text-white">Public Ripple</span>
         </Link>
         <div className="space-x-4">
-          {user && (
+          {mounted && user && (
             <>
               <Link href="/feed">
                 <Button variant="ghost" className="text-white hover:text-gray-300">
                   Feed
+                </Button>
+              </Link>
+              <Link href="/filters">
+                <Button variant="ghost" className="text-white hover:text-gray-300">
+                  Filters
                 </Button>
               </Link>
               <Link href="/profile">

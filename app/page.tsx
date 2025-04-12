@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { login } = useUser()
+  const { user, login } = useUser()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/feed")
+    }
+  }, [user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,23 +44,26 @@ export default function LoginPage() {
         return
       }
 
-      // Login successful
+      // Login successful - update user context
       login(email)
 
       // Check if user has completed survey
       const hasSurvey = await hasCompletedSurvey(email)
 
-      if (hasSurvey) {
-        // Redirect returning users directly to feed
-        router.push("/feed")
-      } else {
-        // Redirect new users to survey
-        router.push("/survey")
-      }
+      // Add a small delay to ensure context is updated before navigation
+      setTimeout(() => {
+        if (hasSurvey) {
+          // Redirect returning users directly to feed
+          router.push("/feed")
+        } else {
+          // Redirect new users to survey
+          router.push("/survey")
+        }
+        setIsLoading(false)
+      }, 100)
     } catch (error) {
       console.error("Login error:", error)
       setError("An error occurred during login")
-    } finally {
       setIsLoading(false)
     }
   }
@@ -89,12 +99,15 @@ export default function LoginPage() {
         description: "Your account has been created successfully! Please complete the survey to personalize your feed.",
       })
 
-      // Redirect new users to survey
-      router.push("/survey")
+      // Add a small delay to ensure context is updated before navigation
+      setTimeout(() => {
+        // Redirect new users to survey
+        router.push("/survey")
+        setIsLoading(false)
+      }, 100)
     } catch (error) {
       console.error("Signup error:", error)
       setError("An error occurred during signup")
-    } finally {
       setIsLoading(false)
     }
   }
