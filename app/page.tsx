@@ -16,25 +16,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <header className="bg-purple-900 py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Newspaper className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white">Public Ripple</span>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => router.push("/login")}
-            className="text-white border-white/30 hover:bg-white/10 hover:text-white"
-          >
-            Sign In
-          </Button>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-16 flex flex-col items-center">
         <motion.div
