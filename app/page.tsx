@@ -61,13 +61,6 @@ export default function HomePage() {
           />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 py-4 px-6 border-t">
-        <div className="container mx-auto text-center text-sm text-gray-500">
-          <p>© 2025 Public Ripple. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   )
 }
