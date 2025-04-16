@@ -78,3 +78,74 @@ def get_personalized_feed(email, flag, categories=None):
                        sorted(scored_articles, key=lambda x: x[1], reverse=True)]
     
     return sorted_articles
+
+def get_labeled_articles(email, limit=20, categories=None):
+    """
+    Get recent articles with comfort/balanced/challenge labels based on 
+    user preferences from both survey and liked articles
+    
+    Args:
+        email (str): User email
+        limit (int): Maximum number of articles to return
+        categories (list, optional): List of categories to filter by
+        
+    Returns:
+        list: List of article dictionaries with added 'type' field
+    """
+    # Get recent articles, optionally filtered by categories
+    articles = DatabaseHandler.get_recent_articles(limit, categories)
+    
+    if not articles:
+        return []
+    
+    # Get the user's survey responses
+    survey_responses = DatabaseHandler.get_survey_responses(email)
+    
+    # Get combined political profile using both survey and likes
+    user_profile = SourceBiasService.get_combined_political_profile(email, survey_responses)
+    
+    # Default to neutral stance if no profile available
+    user_stance = 0
+    if user_profile:
+        user_stance = user_profile['numeric_stance']
+    
+    # Calculate scores and assign labels
+    labeled_articles = []
+    
+    for article in articles:
+        # Store in feed table (without duplicates)
+        DatabaseHandler.insert_feed_without_duplicate(email, "all", article['id'])
+        
+        # Get source bias
+        source = article.get('source', '')
+        source_bias, confidence = SourceBiasService.get_source_bias(source)
+        
+        # Default to balanced type
+        article_type = "balanced"
+        
+        # If we have source bias with good confidence
+        if source_bias and confidence >= 0.5:
+            # Get numeric value for the source bias
+            source_stance = SourceBiasService.BIAS_VALUES.get(source_bias, 0)
+            
+            # Calculate distance between user and source stance (-4 to +4 range)
+            stance_distance = user_stance - source_stance
+            
+            # Normalize to 0-1 alignment score (1 = perfect alignment)
+            alignment = 1 - abs(stance_distance) / 4
+            
+            # Assign type based on alignment
+            if alignment > 0.7:  # High alignment
+                article_type = "comfort"
+            elif alignment < 0.3:  # Low alignment
+                article_type = "challenge"
+            else:  # Medium alignment
+                article_type = "balanced"
+        
+        # Add the type to the article
+        article_with_type = dict(article)
+        article_with_type['type'] = article_type
+        
+        labeled_articles.append(article_with_type)
+    
+    return labeled_articles

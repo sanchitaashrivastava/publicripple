@@ -415,3 +415,48 @@ class DatabaseHandler:
             cursor.close()
             conn.close()
             return False
+    
+    @staticmethod
+    def get_recent_articles(limit=20, categories=None):
+        """
+        Get recent articles, optionally filtered by categories, with limit
+        
+        Args:
+            limit (int): Maximum number of articles to return
+            categories (list, optional): List of categories to filter by
+            
+        Returns:
+            list: List of article dictionaries
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        today = datetime.now().date()
+        
+        if categories:
+            # Assuming articles table has a 'category' column
+            placeholders = ', '.join(['%s'] * len(categories))
+            query = f"""
+                SELECT * FROM articles 
+                WHERE DATE(date_added) = %s 
+                AND category IN ({placeholders})
+                ORDER BY date_added DESC
+                LIMIT %s
+            """
+            params = [today] + categories + [limit]
+        else:
+            query = """
+                SELECT * FROM articles 
+                WHERE DATE(date_added) = %s
+                ORDER BY date_added DESC
+                LIMIT %s
+            """
+            params = [today, limit]
+            
+        cursor.execute(query, params)
+        result = [dict(row) for row in cursor.fetchall()]
+        
+        cursor.close()
+        conn.close()
+        
+        return result

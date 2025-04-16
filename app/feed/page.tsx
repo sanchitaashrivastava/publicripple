@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Heart, ThumbsDown, ExternalLink, SlidersHorizontal, Newspaper } from "lucide-react"
-import { fetchNews, type NewsArticle } from "@/services/news-service"
+// import { fetchNews, type NewsArticle } from "@/services/news-service"
+import { getArticles, type NewsArticle} from "@/services/flask-service"
 import { recordUserFeedback } from "../actions"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -65,7 +66,8 @@ export default function FeedPage() {
 
       try {
         // Fetch articles from database
-        const newsArticles = await fetchNews()
+        // const newsArticles = await fetchNews()
+        const newsArticles = await getArticles(user?.email || "user@example.com")
         setArticles(newsArticles)
         setFilteredArticles(newsArticles)
       } catch (error) {
@@ -88,7 +90,7 @@ export default function FeedPage() {
     if (articles.length === 0) return
 
     const filtered = articles.filter((article) => {
-      const category = assignCategory(article.uuid)
+      const category = article.type
       return filters[category]
     })
 
@@ -128,7 +130,7 @@ export default function FeedPage() {
 
     // Record feedback to backend
     if (!likedArticles.has(article.uuid)) {
-      const category = assignCategory(article.uuid)
+      const category = article.type
       const result = await recordUserFeedback(article, "like", category, user.email)
 
       if (result.success) {
@@ -173,7 +175,7 @@ export default function FeedPage() {
 
     // Record feedback to backend
     if (!dislikedArticles.has(article.uuid)) {
-      const category = assignCategory(article.uuid)
+      const category = article.type
       const result = await recordUserFeedback(article, "dislike", category, user.email)
 
       if (result.success) {
@@ -275,7 +277,7 @@ export default function FeedPage() {
       ) : (
         <div className="grid gap-4">
           {filteredArticles.map((article) => {
-            const category = assignCategory(article.uuid)
+            const category = article.type
             const categoryStyle = categoryColors[category]
 
             return (
