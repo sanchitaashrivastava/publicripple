@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { ArrowRight, Info, Settings, Shield, Sparkles } from "lucide-react"
+import { ArrowRight, BookOpen, Info, Settings, Shield } from "lucide-react"
 
 export default function SurveyIntroPage() {
   const router = useRouter()
@@ -37,8 +37,8 @@ export default function SurveyIntroPage() {
         >
           {/* Header section */}
           <div className="bg-gradient-to-r from-purple-600 to-purple-800 px-8 py-6 text-white">
-            <h1 className="text-2xl font-bold mb-2">Welcome to Your News Journey</h1>
-            <p className="text-purple-100">Before we get started, let's set up your personalized news experience</p>
+            <h1 className="text-2xl font-bold mb-2">Customize Your News Experience</h1>
+            <p className="text-purple-100">Let's discover what kind of news content interests you</p>
           </div>
 
           {/* Content section */}
@@ -46,45 +46,45 @@ export default function SurveyIntroPage() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Info className="h-5 w-5 text-purple-600" />
-                About the Upcoming Survey
+                About the Reading Interest Survey
               </h2>
 
               <p className="text-gray-700 mb-4">
-                You're about to take a brief survey that will help us understand what type of news content you'd like to
-                see in your feed. This is <span className="font-medium">not</span> a test of your beliefs or values —
-                it's simply a way for us to personalize your experience.
+                You're about to take a brief survey that will help us understand what type of news articles you're
+                interested in reading. This is <span className="font-medium">not</span> about your personal beliefs or
+                values — it's simply about your reading preferences.
               </p>
 
               <p className="text-gray-700 mb-4">
-                The survey will present you with different perspectives on topics like Gun Control, Climate Change,
-                Healthcare, Immigration, and Tax Policy. For each topic, you'll indicate which viewpoint you'd prefer to
-                see more of in your feed, or if you'd like a balanced approach.
+                We'll show you a series of real news headlines from various sources. For each one, simply indicate
+                whether you would be interested in reading that article or not. Your responses will help us curate a
+                news feed that contains content you'll find engaging.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <FeatureCard
-                icon={<Sparkles className="h-5 w-5 text-purple-600" />}
-                title="Content Preferences Only"
-                description="Your selections reflect what you want to see, not what you believe"
+                icon={<BookOpen className="h-5 w-5 text-purple-600" />}
+                title="Reading Interests Only"
+                description="Your selections reflect what you want to read, not what you believe"
               />
               <FeatureCard
                 icon={<Settings className="h-5 w-5 text-purple-600" />}
                 title="Adjustable Anytime"
-                description="You can change your preferences later in your profile settings"
+                description="You can refine your reading preferences later in settings"
               />
               <FeatureCard
                 icon={<Shield className="h-5 w-5 text-purple-600" />}
                 title="Initial Setup"
-                description="This is just to get you started with relevant content"
+                description="This helps us create your personalized news feed"
               />
             </div>
 
             <div className="bg-purple-50 rounded-lg p-4 mb-8">
               <p className="text-sm text-purple-800">
-                <strong>Remember:</strong> Public Ripple is designed to help you discover news that either aligns with
-                your interests or thoughtfully challenges them — you decide how far to step outside your comfort zone.
-                Your preferences help us create that experience, but they don't define you.
+                <strong>Remember:</strong> Public Ripple is designed to help you discover news that interests you. Your
+                preferences help us create a personalized experience, but they don't define you. You'll always have
+                control over what appears in your feed.
               </p>
             </div>
 
@@ -95,7 +95,7 @@ export default function SurveyIntroPage() {
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900"
               >
-                Begin Survey
+                {isLoading ? "Loading..." : "Begin Survey"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
